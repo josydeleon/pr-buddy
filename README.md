@@ -68,14 +68,16 @@ PR Buddy uses a hybrid architecture composed of a frontend application and a loc
 
 ## Configuration
 
-The application requires environment variables to connect to external services.
+The application requires environment variables to connect to external services. A template is provided in the `.env.example` file.
 
-1.  Create a `.env` file in the root of the project.
+1.  **Create a `.env` file:**
+    Copy the example file to a new `.env` file in the root of the project.
     ```bash
-    touch .env
+    cp .env.example .env
     ```
 
-2.  Add the following variables to the `.env` file:
+2.  **Configure Variables:**
+    Open the new `.env` file and replace the placeholder values with your actual credentials.
 
     -   **GitHub Token:**
         You need a GitHub Personal Access Token with the following scopes:
@@ -96,6 +98,8 @@ The application requires environment variables to connect to external services.
         ```
         SERVER_PORT=3000
         ```
+
+> **Note:** The `.env` file contains sensitive credentials and should **never** be committed to version control. It is included in the `.gitignore` file by default to prevent this.
 
 ## Usage
 
