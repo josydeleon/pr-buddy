@@ -1,0 +1,31 @@
+# Dependencies
+/node_modules
+
+# Build artifacts
+/dist
+/dist-electron
+/dist-electron-build
+/build
+/out
+/target
+
+# Log files
+*.log
+logs/
+npm-debug.log*
+
+# Environment configuration files
+.env
+.env.local
+.env.*.local
+config.local.js
+
+# IDE and OS generated files
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Test coverage reports
+/coverage
