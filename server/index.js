@@ -1,56 +1,20 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { createServer } from "http";
-import { Server } from "socket.io";
 import { Anthropic } from "@anthropic-ai/sdk";
 
 dotenv.config();
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.VITE_CLIENT_URL || "http://localhost:5173",
-    methods: ["GET", "POST"],
-  },
-});
 
 const PORT = process.env.SERVER_PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// Webhook Endpoint
-app.post("/api/webhook", (req, res) => {
-  const event = req.headers["x-github-event"];
-  const payload = req.body;
-
-  console.log(`Received webhook event: ${event}`);
-
-  if (
-    event === "pull_request" ||
-    event === "pull_request_review" ||
-    event === "pull_request_review_comment"
-  ) {
-    io.emit("github-event", { event, payload });
-    console.log("Emitted github-event to clients");
-  }
-
-  res.status(200).send("Webhook received");
-});
-
 // Initialize Anthropic
 const anthropic = new Anthropic({
   apiKey: process.env.VITE_ANTHROPIC_API_KEY,
-});
-
-// Socket.io connection
-io.on("connection", (socket) => {
-  console.log("Client connected", socket.id);
-  socket.on("disconnect", () => {
-    console.log("Client disconnected", socket.id);
-  });
 });
 
 // AI Analysis Endpoint
@@ -120,6 +84,6 @@ ${diff.substring(0, 100000)} // Truncate to avoid token limits if necessary
 });
 
 // Start server
-httpServer.listen(PORT, async () => {
+app.listen(PORT, async () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

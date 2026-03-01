@@ -1,79 +1,10 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import os from "node:os";
-import pty from "node-pty";
-import fixPath from "fix-path";
 
 // Needed for ESM __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Fix PATH for macOS
-fixPath();
-
-// PTY Logic
-const shell = os.platform() === "win32" ? "powershell.exe" : "/bin/zsh";
-const terminals = new Map<string, pty.IPty>();
-
-ipcMain.on("terminal-create", (event, { id }) => {
-  try {
-    const cwd = process.env.HOME || process.cwd();
-    console.log(`Spawning terminal: shell=${shell}, cwd=${cwd}`);
-
-    const ptyProcess = pty.spawn(shell, [], {
-      name: "xterm-color",
-      cols: 80,
-      rows: 30,
-      cwd: cwd,
-      env: process.env,
-    });
-
-    console.log(`Terminal created: ${id}, PID: ${ptyProcess.pid}`);
-
-    terminals.set(id, ptyProcess);
-
-    ptyProcess.onData((data) => {
-      if (!event.sender.isDestroyed()) {
-        event.sender.send("terminal-output", { id, data });
-      }
-    });
-
-    ptyProcess.onExit(() => {
-      // Cleanup
-    });
-  } catch (err) {
-    console.error("Failed to spawn terminal", err);
-  }
-});
-
-ipcMain.on("terminal-input", (event, { id, data }) => {
-  const term = terminals.get(id);
-  if (term) {
-    term.write(data);
-  } else {
-    console.warn(`Terminal ${id} not found for input`);
-  }
-});
-
-ipcMain.on("terminal-resize", (event, { id, cols, rows }) => {
-  const term = terminals.get(id);
-  if (term) {
-    try {
-      term.resize(cols, rows);
-    } catch (err) {
-      console.error("Resize error", err);
-    }
-  }
-});
-
-ipcMain.on("terminal-kill", (event, { id }) => {
-  const term = terminals.get(id);
-  if (term) {
-    term.kill();
-    terminals.delete(id);
-  }
-});
 
 // The built directory structure
 //
